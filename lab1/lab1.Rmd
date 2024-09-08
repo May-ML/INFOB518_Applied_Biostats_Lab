@@ -1,0 +1,928 @@
+---
+title: "Lab_1_Intro_to_Data_01_04"
+author: "Meiheng_Liang"
+date: "2024-09-06"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+###Intro_to_Data
+### Section 1: BRFSS. 
+#### The Behavioral Risk Factor Surveillance System (BRFSS) is an annual telephone survey of 350,000 people in the United States. The BRFSS is designed to identify risk factors in the adult population and report emerging health trends. For example, respondents are asked about their diet, weekly exercise, possible tobacco use, and healthcare coverage.
+
+#tinytex::install_tinytex(force = TRUE)
+#tinytex::tlmgr_install("xcolor")
+#library(tinytex)
+
+#1. Use the following command to download the dataset \texttt{cdc} from a URL. This dataset is a sample of 20,000 people from the survey conducted in 2000, and contains responses from a subset of the questions asked on the survey.
+source("http://www.openintro.org/stat/data/cdc.R")
+```
+
+```{r , eval = FALSE}
+#2. Take a look at the Environment tab, where \texttt{cdc} should now be visible. Click the blue button next to the dataset name to view a summary of the 9 variables contained in the data matrix. To view the dataset itself, click on the name of the dataset; alternatively, enter the command
+
+View(cdc)
+```
+
+
+```{r , eval = FALSE}
+## Including Plots
+#3. The \$ operator in \textsf{R} is used to access variables within a dataset; for example, \texttt{cdc\$height} tells \textsf{R} to look in the \texttt{cdc} dataframe for the \texttt{height} variable. Make a scatterplot of \texttt{height} and \texttt{weight} using the \texttt{plot( )} command:
+##question Lab 1 :Do \texttt{height} and \texttt{weight} appear to be associated?
+plot(cdc$weight ~ cdc$height)
+print(" There is an association between height and weight.")
+
+```
+
+```{r}
+##    A BMI of 30 or above is considered obese. Why might health agencies choose to use BMI as a measure of obesity, rather than weight?
+meter_hei = cdc$height*.0254 #convert metric
+
+#create weight.kg
+kilo_wei = cdc$weight*.454 # convert metric
+
+bmi = (kilo_wei)/(meter_hei^2) #calculate bmi
+
+#plot height and bmi
+plot(cdc$height, bmi)
+print(" BMI is a indication of proper ratio between weigt and height whereas solely weight is dependant to personal heights, and is not a proper reflection of whether person is fat or not.")
+```
+
+
+```{r}
+##7. Use bracket notation to make a scatterplot of \texttt{height} and \texttt{weight} for the first 100 respondents.
+##question Lab 1 :Do \texttt{height} and \texttt{weight} appear to be associated?
+
+plot(cdc[1:100, 6], cdc[1:100, 8], 
+     xlab = "weight", 
+     ylab = "age", 
+    
+     main = "Scatter Plot of weight vs. Age")
+```
+
+```{r, eval=TRUE}
+#6. Row-and-column notation in combination with square brackets can be used to access a subset of the data. For example, to access the sixth variable (\texttt{weight}) of the 567th respondent, use the command:
+cdc[567, 6] #to access a subset of the data
+cdc[1:10, 6] #see the weight for the first ten respondents
+cdc[1:10, ] # If the column number is omitted, then all the columns will be returned for rows 1 through 10
+cdc[ ,6] #omit the range for the rows to access all observations for column 6.
+```
+
+
+```{r, fig.height = 4}
+##From Question 1
+##Plot 3.b Plot Weight and age
+##Plot Height and Age using row and column index notation for example: plot(cdc[1:100, 5], cdc[1:100, 6])
+sub100 = cdc[1:100, ]
+plot(sub100$height, sub100$weight)
+
+#subset the variables separately
+sub100_h = cdc[1:100, 5]
+sub100_w = cdc[1:100, 6]
+plot(sub100_h, sub100_w)
+
+#nest the commands
+plot(cdc[1:100, 5], cdc[1:100, 6])
+```
+
+
+```{r}
+### Section 2: Gene Transcript Lengths.
+
+#load the oibiostat package
+library(oibiostat)
+#load the coding.mrna dataset
+data(coding.mrna)
+```
+
+```{r}
+#1. How many transcripts are represented in this dataset? 
+nrow(coding.mrna)
+#2. Calculate the 5-number summary for the transcript lengths using the \texttt{summary()} command. What striking feature do you notice in the summary?
+
+summary(coding.mrna$transcript_length)
+print("The Maximum is probably a outlier as the 3rd quotile is farther away")
+```
+
+```{r}
+#3. Draw a histogram and a boxplot of the distribution of transcript lengths. When you see them, you will notice that the plots are not particularly informative. Explain why you think that is the case.
+#create a histogram
+hist(coding.mrna$transcript_length)
+#create a boxplot
+boxplot(coding.mrna$transcript_length)
+print("The data is cringed together that we can only tell it is left skewed, but it does not tell data distribution in details.")
+```
+
+
+```{r, eval = TRUE}
+#4. For a data item \texttt{x}, the notation \texttt{x < a} is used to reference the subset of values of \texttt{x} that are less than the value \texttt{a}. Pick a reasonable length \texttt{a} and use the \texttt{subset()} command to create a trimmed version of \texttt{coding.mrna} called \texttt{lengths.subset} that only contains data for transcripts with length less than \texttt{a}. This is one simple strategy for making the structure of the data easier to view in the plot.
+
+sub_mrna = subset(coding.mrna, coding.mrna$transcript_length < 3000)
+#With the trimmed data, draw a histogram and boxplot, and calculate summary statistics. 
+#create a histogram with lengths.subset
+hist(sub_mrna$transcript_length)
+
+#create a boxplot with lengths.subset
+boxplot(sub_mrna$transcript_length)
+
+#calculate summary statistics
+summary(sub_mrna$transcript_length)
+
+print("the data is left skewed, and majority of data points are at slight lower end of value range, which is much more descriptive when compare to single column of full set of data")
+
+```
+
+```{r}
+#5. Use \textsf{R} to find out how many transcripts you have trimmed from the dataset. Hint: this might involve notation used in Questions 1 and 4.
+
+remain <- nrow(coding.mrna) - nrow(sub_mrna)
+remain
+```
+```{r}
+##6.Now with \texttt{transcript.sample}, calculate the number of transcripts in the dataset, the five-number summary, and draw a histogram and boxplot. Does the sample data more closely resemble the complete version of the data or the trimmed version from Question 4?
+
+#One way of manipulating a large dataset is to take a random sample and construct numerical and graphical summaries of the sample. Use the following code to construct a random sample that consists of 10\% of the original number of transcripts; the sampling is done without replacement, such that a single transcript cannot be chosen more than once.
+
+#Using the \texttt{set.seed()} function allows for pseudo-random sampling; that is, a random sample that is reproducible. Replace \texttt{xxxx} in the function with four numbers of your choice, then run the code to create \texttt{transcript.sample}, a vector of transcript lengths. 
+set.seed(3001)
+sample.size = 0.1 * nrow(coding.mrna)
+txn = sample(coding.mrna$transcript_length, size = sample.size)
+```
+
+```{r}
+length(txn)
+summary(txn)
+hist(txn)
+boxplot(txn)
+```
+
+
+```{r, fig.width = 10, fig.height = 4}
+#7. Make side-by-side boxplots of transcript lengths by chromosome. Use the command: 
+boxplot(coding.mrna$transcript_length ~ coding.mrna$chromosome_name)
+```
+
+```{r}
+#8. Subset \texttt{coding.mrna} to only include values from chromosome 2. Repeat for the Y chromosome. Hint: the notation is similar to that used in Question 4.     Use \texttt{nrow()} to compare the number of transcripts on chromosome 2 and the Y chromosome. Are the results what you might expect, based on what you know about the inheritance of human sex chromosomes? Why or why not?
+
+chr.2 = subset(coding.mrna, coding.mrna$chromosome_name == 2)
+chr.Y = subset(coding.mrna, coding.mrna$chromosome_name == "Y")
+
+nrow(chr.2)
+nrow(chr.Y)
+print(" it is expected as main functional protein are encoded in somatic chromosome and Y chromosome is the smallest chromosome with the least encoding.")
+```
+
+```{r}
+### Section 3: NHANES.
+#### Question 1.
+#load the NHANES package and dataset
+library(NHANES)
+data(NHANES)
+#a) Describe in words the distribution of ages for the study participants.
+summary(NHANES$Age)
+print("the ages of participants are fairly normally distributed")
+
+hist(NHANES$Age)
+boxplot(NHANES$Age)
+
+#  b) Using numerical and graphical summaries, describe the distribution of heights among study participants in terms of inches.  Note that 1 centimeter is approximately 0.39 inches.   
+inch_h = NHANES$Height * 0.39
+
+summary(inch_h)
+hist(inch_h)
+boxplot(inch_h)
+
+print("the distribution is right skewed, and there are more participants with height that is at the higher end.")
+
+#  c) Use the following code to draw a random sample of 200 participants from the entire dataset. Using the random sample, \texttt{nhanes.samp}, investigate at which age people generally reach their adult height. Is it possible to do the same for weight; why or why not?
+
+set.seed(5011)
+part_200 = sample(1:nrow(NHANES), 200)
+subj = NHANES[part_200, ]  
+
+plot(subj$Age, subj$Height)
+plot(subj$Age, subj$Weight)
+print("people reach adult height around 15-20 years old, but weight can continue change due to personal life style and genetics.")
+```
+
+```{r}
+#### Question 2.
+##What Proportion of Americans at least 25 years of age with a high school degree are high school graduates?
+#a) What proportion of Americans at least 25 years of age are college graduates?
+adult = NHANES[NHANES$Age >= 25, ]
+adult 
+
+#age adult education
+summary(adult$Education)
+adult_edu = length(adult$Education)
+
+#b) What proportion of Americans at least 25 years of age with a high school degree are college graduates?
+col_grad <- 2016/adult_edu
+col_grad
+
+highschool_grad <- 1345/adult_edu
+print(paste(highschool_grad, " of Americans adults 25 years and over with high school degrees"))
+
+#b) What proportion of Americans at least 25 years of age with a high school degree are college graduates?
+w_highschool_degree <-(2016)/(1345  + 1951 + 2016)
+w_highschool_degree
+```
+```{r}
+#### Question 3.
+#  a) Calculate the median and interquartile range of the distribution of the variable \texttt{Poverty}. Write a sentence explaining the median in the context of these data.
+summary(NHANES$Poverty)
+print("The median is slightly lower than mean, meaning there are more values that are slightly higher or the value of upper quatile is are noticeable higher in each indivudial than that of lower quatile, The distribution of median indivating there might be trend that slightly fewer people are under poverty ")
+
+#b) Compare the distribution of \texttt{Poverty} across each group in \texttt{Education} among adults (defined as individuals 25 years of age or older). Describe any trends or interesting observations.
+boxplot(adult$Poverty ~ adult$Education)
+print("for adults 25 years and over, degree attainments is negatively correlated with degree of poverty")
+```
+
+```{r}
+
+#### Question 4.
+# a) Construct a two-way table, with \texttt{PhysActive} as the row variable and \texttt{Diabetes} as the column variable. Among participants who are not physically active, what proportion have diabetes? What proportion of physically active participants have diabetes?
+addmargins(table(PhysActive=NHANES$PhysActive, Diabetes=NHANES$Diabetes))
+inactive_diabet = 472/3675
+active_diabet = 285/4646
+inactive_diabet
+active_diabet
+
+print(paste(inactive_diabet, " of inactive Americans adults 25 years are suffered from diabetes"))
+print(paste(active_diabet, " of active Americans adults 25 years are suffered from diabetes"))
+
+#b) In this context, relative risk is the ratio of the proportion of participants who have diabetes among those who are not physically active to the proportion of participants with diabetes among those physically active. Relative risks greater than 1 indicate that people who are not physically active seem to be at a higher risk for diabetes than physically active people. Calculate the relative risk of diabetes for the participants.
+rela_risk = inactive_diabet/active_diabet
+rela_risk
+
+```
+
+```{r}
+###01_Intro_To_data_02_DDS
+### Distributions of single variables
+#1. Load the \texttt{dds.discr} dataset into *RStudio*. Descriptions of the variables are provided in the documentation file. Produce a table of the first five rows in the data matrix.
+data("dds.discr")
+#2. Using appropriate numerical and graphical summaries, examine the distributions of each of the variables in the dataset and answer the following questions.
+dds.discr[1:5,]
+summary(dds.discr$expenditures)
+hist(dds.discr$expenditures)
+boxplot(dds.discr$expenditures)
+##a) Describe the distribution of annual expenditures. For most consumers, is the amount of financial support provided by the DDS relatively high or low?
+print("the financial support is low, hence most expenditure values are at the lower end.")
+
+# b) The variable \texttt{age} directly records a consumer's age; in the \texttt{age.cohort} variable, consumers are assigned to one of six age cohorts. Describe the distribution of age in this sample of consumers. Do consumers tend to be older or younger?
+
+hist(dds.discr$age)
+plot(dds.discr$age.cohort)
+summary(dds.discr$age)
+table(dds.discr$age.cohort)
+
+print("The consumer tend to be younger")
+
+#c) Is there an equal representation of ethnic groups in this sample of consumers?
+plot(dds.discr$ethnicity)
+summary(dds.discr$ethnicity)
+prop.table(table(dds.discr$ethnicity))  #converts a table of counts to proportions
+print("the representation of ethinic groups is not equal")
+#d) Does gender appear to be balanced in this sample of consumers?
+plot(dds.discr$gender)
+summary(dds.discr$gender)
+print("the gender appear to be balanced")
+
+
+```
+
+
+```{r, fig.width = 8, fig.height = 4.5}
+### Relationships between two variables
+#3. How do annual expenditures vary by age? Is there a large amount of variation in expenditures between age cohorts? Use the \texttt{age.cohort} variable. 
+plot(dds.discr$expenditures ~ dds.discr$age.cohort)
+print("higher age have higher expenditure")
+
+#4. Do annual expenditures seem to vary by gender?
+plot((dds.discr$expenditures ~ dds.discr$gender))
+print("the annual expenditure does not vary much, but the major spending and overall range is higher in female consumer")
+
+#5. How does the distribution of expenditures vary by ethnic group? Does there seem to be a difference in the amount of funding that a person receives, on average, between different ethnicities?
+plot((dds.discr$expenditures ~ dds.discr$ethnicity))
+
+print("there are significant difference in amount received and expenditure between different ethnicities")
+```
+
+```{r}
+#6. Compare the distribution of \texttt{expenditures} between Hispanic and White non-Hispanic consumers, graphically and numerically. Do Hispanic consumers, on average, seem to receive less financial support from the California DDS than a White non-Hispanic consumer?
+
+boxplot(dds.discr$expenditures[dds.discr$ethnicity == "Hispanic"],
+    dds.discr$expenditures[dds.discr$ethnicity == "White not Hispanic"],
+    names = c("Hispanic", "White not Hispanic"))
+summary(dds.discr$expenditures[dds.discr$ethnicity == "Hispanic"])
+summary(dds.discr$expenditures[dds.discr$ethnicity == "White not Hispanic"])
+print("hispanic is receiving signficantly less financial support than a white non-hispanic consumer)")
+```
+
+
+```{r}
+#7. Recall that expenditures is strongly associated with age---older individuals tend to receive more financial support. Is there also an association between age and ethnicity, for these two ethnic groups? Examine the distribution of age within each group and describe your findings.
+plot(dds.discr$age.cohort[dds.discr$ethnicity == "Hispanic"])
+plot(dds.discr$age.cohort[dds.discr$ethnicity == "White not Hispanic"])
+summary(dds.discr$age.cohort[dds.discr$ethnicity == "Hispanic"])
+summary(dds.discr$age.cohort[dds.discr$ethnicity == "White not Hispanic"])
+print("hispanic population tend to receive more in earlier age but decrease in elder population, where as non-hispanic whites receive more supports at older age")
+
+
+```
+
+```{r}
+#8. For a closer look at the relationship between age, ethnicity, and expenditures, compare how average \texttt{expenditures} differs by ethnicity within each age cohort. If age is indeed the primary source of the observed variation in expenditures, then there should be little difference in average \texttt{expenditures} between individuals in different ethnic groups but the same age cohort. Is this the case? Describe your findings.
+his = dds.discr[dds.discr$ethnicity == "Hispanic", ]
+white_nh = dds.discr[dds.discr$ethnicity == "White not Hispanic", ]
+
+his_mean = tapply(his$expenditures, his$age.cohort, mean)
+white_nh_mean = tapply(white_nh$expenditures, white_nh$age.cohort, 
+mean)
+dif_w_nh_his <- white_nh_mean - his_mean
+dif_w_nh_his
+
+#9. Based on this exploratory analysis, does there seem to be evidence of ethnic discrimination in the amount of financial support provided by the California DDS? Summarize your findings in language accessible to a non-statistician.
+print(" there are significant difference between amount that received as hispanic population, and higher the age, bigger the disparities.")
+```
+
+```{r}
+### Simpson's paradox
+#10. Calculate the overall weighted average expenditures for Hispanics and for White non-Hispanics, using the proportions of individuals in each age cohort (Question 7) and the average expenditures for each Cohort (Question 8). How does the weighting lead to overall average expenditures for White non-Hispanics to be higher than for Hispanics?    \textcolor{NavyBlue}{The weights for the youngest four cohorts, which have lower expenditures, are higher for the Hispanic population than the White non-Hispanic population; additionally, the weights for the oldest two cohorts, which have higher expenditures, are higher for the White non-Hispanic population. This leads to overall average expenditures for the White non-Hispanics to be higher than for Hispanics.}
+
+his_weight = prop.table(table(dds.discr$age.cohort[dds.discr$ethnicity == "Hispanic"]))
+his_weight
+his_weight_spend <- his_weight*his_mean
+sum(his_weight_spend)
+
+white_nh_weights = prop.table(table(dds.discr$age.cohort[dds.discr$ethnicity == "White not Hispanic"]))
+white_nh_weights
+white_nh_weight_spend <- white_nh_weights*white_nh_mean
+sum(white_nh_weight_spend)
+print(" the hispanic tend to have less weight spend total than that of white_nonhispanic")
+```
+
+```{r}
+### Identifying informative genes
+#1. Run the following code to load \texttt{golub.train} and create \texttt{gene.matrix}, which contains only the expression data and not the phenotype information in the first 6 columns.
+data(golub.train)
+golub.train
+gene.matrix = as.matrix(golub.train[ ,-(1:6)])
+
+```
+
+```{r}
+##2. Draw a random sample of 100 genes from the dataset.
+#create a vector of integers from 1 to the total number of genes
+gene.columns = 1:ncol(gene.matrix)
+
+#set the seed for a pseudo-random sample
+set.seed(2401)
+
+#sample 100 numbers from gene.columns, without replacement
+gene.index.set = sample(gene.columns, size = 100, replace = FALSE)
+gene.index.set
+#creeate a matrix with expression data from the rows specified by gene.index.set
+gene.matrix.sample = gene.matrix[ ,gene.index.set]
+View(gene.matrix.sample)
+#a) What are the first five values of \texttt{gene.index.set}? How were the numbers in \texttt{gene.index.set} chosen?
+print("4841 6731 6535 6743 4804, the number were ramdomly chosen from the total gene pool in the data, and the seed() allows reproducible sample drawning")
+
+#b) Why is it important to sample without replacement?
+print("replacement=true can generate the same number when the number is refilled after taking out,and sampling without replacement is important because it ensures that each sampled gene is unique and not repeated.")
+
+#c) View \texttt{gene.matrix.sample}; what does it contain? How is \texttt{gene.matrix.sample} related to \texttt{gene.index.set}?
+print("gene.matrix.sample c ontains expression data for 100 randomly selected genes from the gene.matrix. ")
+
+#d) What are the first five gene names of the 100 genes sampled?
+gene.names <- colnames(gene.matrix)
+sampled.gene.names <- gene.names[gene.index.set]
+first.five.sampled.gene.names <- sampled.gene.names[1:5]
+first.five.sampled.gene.names
+
+
+#e) Plot a histogram showing the distribution of the expression levels of the second gene across patients. Describe the distribution.
+second_gene_expression <- gene.matrix.sample[, 2]
+
+hist(second_gene_expression, 
+     main = "Distribution of Expression Levels of the Second Gene Across Patients",
+     xlab = "Expression Level",
+     ylab = "Frequency",
+     col = "lightblue",
+     border = "black")
+```
+
+
+```{r, eval = FALSE}
+#3. Create a logical variable, \texttt{leuk.type}, that has value \texttt{TRUE} for AML and value \texttt{FALSE} for anything that is not AML (i.e., \texttt{allT} and \texttt{allB}). For a logical variable, \textsf{R} interprets \texttt{TRUE} as \texttt{1} and \texttt{FALSE} as \texttt{0}.
+
+#create logical variable
+leuk.type = (golub.train$cancer == "aml")
+#view table of leukemia types
+table(leuk.type)
+
+#calculate sum of leuk.type
+sum(leuk.type)
+
+#a) When creating the logical variable, why not write \texttt{"allT"} or \texttt{"allB"} instead of \texttt{"aml"}?
+print(" 'allT' or 'allB' would create logical variables that only return all, not both both types ")
+
+#b) How many patients have AML? How many have ALL?
+print(" 20 patients have AML, 42 patients have ALL ")
+
+```
+
+```{r, eval = FALSE}
+##4. Summarize the data separately for AML patients and for ALL patients.
+#a) The following code calculates the mean expression level for each sampled gene across AML patients, storing it in the variable \texttt{aml.mean.expression}. The \texttt{apply()} function executes a function across a matrix---in this case, the function is \texttt{mean}, and the \texttt{2} in the argument indicates that the function should be applied on each column (replacing the \texttt{2} with a \texttt{1} would result in the mean being calculated across the rows). 
+#calculate mean expression level for each sampled gene across AML patients
+
+aml.mean.expression = apply(gene.matrix.sample[leuk.type == TRUE, ], 2, mean)
+all.mean.expression = apply(gene.matrix.sample[leuk.type == FALSE, ], 2, mean)
+aml.mean.expression
+
+#Run the code to create \texttt{aml.mean.expression}, then create \texttt{all.mean.expression}, a vector containing the mean expression levels for each gene in ALL patients.
+#b) Explain the logic behind the code to generate \texttt{aml.mean.expression} and \texttt{all.mean.expression}. In other words, what do the separate components instruct \textsf{R} to do?
+    print("the apply() applys mean calculation to AML positive rows(TRUE)")
+#c) View the contents of \texttt{aml.mean.expression}. What is the average expression level of the first sampled gene across AML patients?
+aml.mean.expression[1]
+
+#5. For each gene, compare the mean expression value among AML patients to the mean among ALL patients; calculate the differences in mean expression levels between AML and ALL patients.
+#calculate the differences
+diff.mean.expression = (aml.mean.expression - all.mean.expression)
+
+#view list as a matrix
+diff.mean.expression.matrix = as.matrix(diff.mean.expression)
+diff.mean.expression.matrix
+
+#a) What is the difference in mean expression level between AML and ALL for the first gene on the list; on average, is this gene more highly expressed in AML patients or ALL patients? Does it seem like this gene could be a good predictor of leukemia type? Why or why not?
+diff.mean.expression.matrix[1]
+print("X95406_at is more highly epressed in AML. Normalization and other correlation must be done before determine whether it is correlated.")
+#b) Using numerical and graphical summaries, describe the distribution of differences in mean expression levels.
+summary(diff.mean.expression)
+hist(diff.mean.expression, 
+     main = "Histogram of Differences in Mean Expression Levels (AML - ALL)", 
+     xlab = "Difference in Expression Levels", 
+     ylab = "Frequency", 
+     col = "lightblue", 
+     border = "black")
+
+plot(aml.mean.expression, all.mean.expression, 
+     main = "Scatter Plot of Mean Expression Levels: AML vs. ALL", 
+     xlab = "AML Mean Expression Level", 
+     ylab = "ALL Mean Expression Level", 
+     col = "blue", 
+     pch = 19)
+print("Graphical and IQR distribution is left skewed, meaning majority of the expression differencies are small, but there are a few genes with significant differencies, and expression levels can vary significantly.")
+
+```
+
+
+```{r, eval = FALSE}
+##6. Identify the outliers. Run the following code to set up the definition of outliers as specified in Chapter 1 of *OpenIntro Biostatistics*:
+#define 3rd and 1st quartiles
+quart.3 = quantile(diff.mean.expression.matrix[ ,1], 0.75, na.rm = TRUE)
+quart.1 = quantile(diff.mean.expression.matrix[ ,1], 0.25, na.rm = TRUE)
+
+#define interquartile range
+iqr = quart.3 - quart.1
+
+#define upper and lower bound for outliers
+lb.outlier = quart.1 - 1.5*iqr
+ub.outlier = quart.3 + 1.5*iqr
+
+#The following code creates a list of the large outliers, genes with expression differences larger than \texttt{ub.outlier}:
+#creates list of large outliers
+which.large.out = diff.mean.expression > ub.outlier
+large.out = as.matrix(diff.mean.expression.matrix[which.large.out, ])
+large.out
+
+#creates ordered list of large outliers, from largest to smallest
+order.large.out = order(large.out[ ,1], decreasing = TRUE) #assigns ordering to rows
+ordered.large.out = as.matrix(large.out[order.large.out, ]) #sorts outlier list
+ordered.large.out
+
+#a) What are the upper and lower outlier bounds?
+lb.outlier
+ub.outlier
+print("uper bound at 75% is 459.0132, and lower bound at 24% is 420.1131 ")
+
+#b) How many large outliers are present in the sample?
+length(which.large.out)
+
+#c) How many rows and columns does \texttt{large.out} have? Explain why.
+nrow(large.out)
+ncol(large.out)
+print(" The number of rows  corresponds to the number of large outliers. One column contains the expression differences.")
+#d) View \texttt{order.large.out}. What do these numbers represent?
+print(" a vector of expression differences of genes that were organized in decending orders. Top of list indicating highest expression difference of gene in different conditions, vice versa")
+#e) Modify the code to find small outliers. How many small outliers are present in the sample?
+which.small.out = diff.mean.expression < lb.outlier
+small.out = as.matrix(diff.mean.expression.matrix[which.small.out, ])
+num_small_outliers <- nrow(small.out)
+num_small_outliers
+
+#f) Which gene has the largest positive difference in mean expression between AML and ALL samples? Which gene has the largest negative difference in mean expression between AML and ALL samples?
+largest_positive_gene <- rownames(ordered.large.out)[1]
+largest_positive_gene
+smallest_negative_gene <- rownames(diff.mean.expression.matrix)[which.min(diff.mean.expression)]
+smallest_negative_gene
+
+#g) In a research setting, it can also be useful to inspect the entire list and examine genes that are close to the outlier cutoff. Run the following code to order the entire list of expression differences in decreasing order:
+order.decreasing = order(diff.mean.expression.matrix[ ,1], decreasing = TRUE)
+ordered.outliers = as.matrix(diff.mean.expression.matrix[order.decreasing, ])
+#    Which gene just missed the cutoff to qualify as a large outlier? Which gene is closest to the cutoff for qualifying as a small outlier?
+gene_just_below_large_outlier <- rownames(diff.mean.expression.matrix)[order.decreasing[sum(which.large.out) + 1]]
+gene_just_below_large_outlier
+order.increasing = order(diff.mean.expression.matrix[, 1])
+gene_just_above_small_outlier <- rownames(diff.mean.expression.matrix)[order.increasing[sum(which.small.out) + 1]]
+gene_just_above_small_outlier
+
+
+```
+```{r}
+##7. The genes previously identified as outliers are only outliers of the specific 100 genes chosen in the sample. From the complete set of data in \texttt{golub.train}, identify the five largest outliers and five smallest outliers out of all 7,129 genes. (*Hint*: this can be done with only a few modifications to the code run for the initial analysis.) 
+gene.matrix <- golub.train[, 7:ncol(golub.train)]
+leuk.type <- golub.train$cancer == "aml" 
+aml.mean.expression <- colMeans(gene.matrix[leuk.type, ], na.rm = TRUE)
+all.mean.expression <- colMeans(gene.matrix[!leuk.type, ], na.rm = TRUE)
+diff.mean.expression <- aml.mean.expression - all.mean.expression
+quart.3 <- quantile(diff.mean.expression, 0.75, na.rm = TRUE)
+quart.1 <- quantile(diff.mean.expression, 0.25, na.rm = TRUE)
+iqr <- quart.3 - quart.1
+
+ub.outlier_full <- quart.3 + 1.5 * iqr
+lb.outlier_full <- quart.1 - 1.5 * iqr
+ub.outlier_full
+lb.outlier_full
+
+which.large.out <- diff.mean.expression > ub.outlier_full
+which.small.out <- diff.mean.expression < lb.outlier_full
+
+large_out_full <- diff.mean.expression[which.large.out]
+small_out_full <- diff.mean.expression[which.small.out]
+
+order.large.out <- sort(large_out_full, decreasing = TRUE)
+order.small.out <- sort(small_out_full)
+
+top_5_large_outliers <- head(order.large.out, 5)
+top_5_small_outliers <- head(order.small.out, 5)
+
+print("Top 5 largest outliers:")
+top_5_large_outliers
+
+print("Top 5 smallest outliers:")
+top_5_small_outliers
+
+```
+
+```{r, eval = FALSE}
+### Predicting leukemia type
+##8. Run the following code to identify the column numbers in \texttt{golub.test} and \texttt{golub.train} corresponding to the 10 predictor genes identified in Question 7. Using \texttt{which()} returns the column numbers that correspond to the 10 predictor genes. from \texttt{gene.matrix}, the matrix without the 6 columns of phenotypic data. Adding 6 results in the corresponding column numbers in \texttt{golub.test} and \texttt{golub.train}.
+
+#column numbers for large outliers (gene.matrix)
+predictors.large = which(which.large.out)[order.large.out[1:5]]
+
+#column numbers for small outliers (gene.matrix)
+predictors.small = which(which.small.out)[order.small.out[1:5]]
+
+#combine column numbers for large and small outliers (gene.matrix)
+predictors = c(predictors.large, predictors.small)
+
+#predictor column numbers of golub.test and golub.train
+predictor.cols = predictors + 6
+
+
+##9. Calculate $\mu_{AML}$ and $\mu_{ALL}$ for each of the predictor genes. Store the results in \texttt{predictor.means.aml} and \texttt{predictor.means.all}. What are $\mu_{AML}$ and $\mu_{ALL}$ for the first predictor gene?
+predictor.data <- golub.train[, 7:ncol(golub.train)]
+aml_patients <- golub.train$cancer == "aml"
+predictor.means.aml <- colMeans(predictor.data[aml_patients, ])
+predictor.means.all <- colMeans(predictor.data[!aml_patients, ])
+mean_aml_1st_gene <- predictor.means.aml[1]
+mean_all_1st_gene <- predictor.means.all[1]
+
+print("mean_AML for the first predictor gene:") 
+mean_aml_1st_gene
+print("mean_ALL for the first predictor gene:") 
+mean_all_1st_gene
+
+##10. Determine the vote direction for each gene. Let \texttt{0} represent a vote for AML and \texttt{1} represent a vote for ALL. 
+vote.direction <- ifelse(predictor.means.aml > predictor.means.all, 0, 1)
+print("Vote directions for each predictor gene:")
+head(vote.direction)
+tail(vote.direction)
+```
+
+```{r, eval = FALSE}
+# Load golub.test
+data("golub.test")
+
+##10. Determine the vote direction for each gene. Let \texttt{0} represent a vote for AML and \texttt{1} represent a vote for ALL. 
+
+# Create matrix with expression data for predictor genes
+test.gene.matrix = golub.test[, 7:ncol(golub.test)]
+
+# Create empty matrix to store vote directions
+num.genes = ncol(test.gene.matrix)
+num.patients = nrow(test.gene.matrix)
+votes = matrix(nrow = num.patients, ncol = num.genes)
+
+colnames(votes) <- colnames(test.gene.matrix)
+# Calculate vote directions
+for (i in 1:num.patients) {
+  for (j in 1:num.genes) {
+    
+    # Calculate distance from AML and ALL mean for each patient-gene pair
+    dist.from.aml = abs(test.gene.matrix[i, j] - predictor.means.aml[j])
+    dist.from.all = abs(test.gene.matrix[i, j] - predictor.means.all[j])
+    
+    # Assign votes based on the closest mean
+    if (dist.from.aml <= dist.from.all) {
+      votes[i, j] = 0  # Assigns 0 if dist. from AML mean <= dist. from ALL mean
+    } else {
+      votes[i, j] = 1  # Assigns 1 if otherwise
+    }
+    
+  }
+}
+View(votes)
+
+#The above code uses \texttt{for()} loops and a conditional \texttt{if()} statement to assign vote directions for each of the 10 predictor genes, for each patient. A more formal introduction to loops and conditional statements will be provided in the next chapter; for now, focus on understanding the logic of the code, rather than the precise syntax.
+
+#a) The loop stores the results in a matrix called \texttt{votes}. What are the dimensions of the matrix? Does a single row contain the votes for a single patient, or the votes for a single gene? (*Hint*: refer to the syntax used to create the empty \texttt{votes} matrix.)
+dim(votes)
+print("row = each patient, column = absolute difference of each gene expression level compare to the gene expression of same cohort")
+
+#b) Inside the loop, the two vectors \texttt{dist.from.aml} and \texttt{dist.from.all} store the distance between an expression value and the AML or ALL mean, respectively; the distance is calculated as the absolute value of the expression value in a specific cell minus a predictor mean (either AML or ALL). The loop extends in two directions, where \texttt{i} ranges from 1:10 and \texttt{j} ranges from 1:10, since the dimensions of the \texttt{votes} matrix are 10 (rows) by 10 (columns).
+
+#i. In the first step of the loop, \texttt{i = 1} and \texttt{j = 1}. Based on what you know about bracket notation, describe what is being calculated and stored in \texttt{dist.from.aml} and \texttt{dist.from.all} for these values of \texttt{i} and \texttt{j.}
+print("When i = 1 and j = 1, it Refers to the first gene(j) of first patient(i). the loop calculate the absolute  differences of expression value of the the first gene of the patient from the mean expression of the gene in the same patient type")
+    
+#ii. What is being calculated and stored when \texttt{i = 2} and \texttt{j = 1}?
+print("the absolute difference of the first gene(j) of second patient(i) compared to the mean expression of same gene of same patient cohort (all/ aml).")
+    
+#iii. What is being calculated and stored when \texttt{i = 1} and \texttt{j = 2}?
+print("the absolute difference of the second gene(j) of the first patient(i) compared to the mean expression of same gene of same patient cohort (all/ aml).")
+    
+#iv. Based on the previous answers, why does it make sense for the loop to calculate distance based on \texttt{predictor.means.aml[j]} and \texttt{predictor.means.all[j]} instead of \texttt{predictor.means.aml[i]} and \texttt{predictor.means.all[i]}?
+print("This ensures that the mean expression levels are correctly matched to each gene (j). Using [i] would incorrectly try to match the means to patients, not genes.")
+    
+#c) View the first row of the matrix \texttt{votes}. For which predictor genes does this patient have AML-like expression, and for which does this patient have ALL-like expression?
+votes[1, ]
+first_patient_votes <- votes[1, ]
+aml_like_genes <- colnames(votes)[first_patient_votes == 0]  # Genes with AML-like expression (vote = 0)
+all_like_genes <- colnames(votes)[first_patient_votes == 1]  # Genes with ALL-like expression (vote = 1)
+
+aml_like_expression <- test.gene.matrix[1, aml_like_genes, drop = FALSE]
+all_like_expression <- test.gene.matrix[1, all_like_genes, drop = FALSE] 
+print("AML-like gene expressions for the first patient:")
+aml_like_expression
+
+print("ALL-like gene expressions for the first patient:")
+all_like_expression
+
+```
+
+##11. Calculate $v_1, \dots, v_{10}$, the magnitude of the deviations from the midpoint between the two means. The following code stores the magnitudes of the deviations in a matrix named \texttt{deviation.magnitude}.
+```{r, eval = FALSE}
+deviation.magnitude = matrix(nrow = num.patients, ncol = num.genes)
+
+for(i in 1:dim(deviation.magnitude)[1]){
+  for(j in 1:dim(deviation.magnitude)[2]) {
+    
+    midpoint = (predictor.means.aml - predictor.means.all)/2
+    
+    deviation.magnitude[i,j] = abs(test.gene.matrix[i, j] - midpoint[j])
+    
+  }
+}
+
+#adds predictor gene probe names from test.gene.matrix
+colnames(deviation.magnitude) <- colnames(test.gene.matrix)
+#a) View \texttt{deviation.magnitude}. What is the deviation from the midpoint at the M19507\_at probe for patient 1? For which patient is the deviation at this gene probe the largest?
+View(deviation.magnitude)
+patient1_dev <- deviation.magnitude[1, "M19507_at"]
+print(paste("Deviation from the midpoint for patient 1:", patient1_dev))
+
+patient_largest_dev <- which.max(deviation.magnitude[, "M19507_at"])
+print(paste("Patient with the largest deviation:", patient_largest_dev))
+
+
+#b) For patient 1, which values should be summed to calculate $V_{AML}$? (*Hint*: Refer to Question 10, part c.) 
+print("for calculating the vote, diaviation magnitude of genes that have AML-Like expression = 0 should be summed")
+aml_like_genes_patient1 <- which(votes[1, ] == 0)
+V_AML_patient1 <- sum(deviation.magnitude[1, aml_like_genes_patient1])
+print(paste("V_AML (deviation magitudes) for patient 1:", V_AML_patient1))
+```
+```{r, eval = FALSE}
+##12. Calculate $V_{AML}$ and $V_{ALL}$ for each patient, and determine which leukemia type is predicted.
+
+#sum the votes for AML and ALL
+V.aml = vector("numeric", num.patients)
+V.all = vector("numeric", num.patients)
+
+for(i in 1:num.patients){
+  
+  V.aml[i] = sum(deviation.magnitude[i, which(votes[i,] == 0)])
+  V.all[i] = sum(deviation.magnitude[i, which(votes[i,] == 1)])
+  
+}
+
+#determine the predicted leukemia type
+predicted.leuk.type = vector("numeric", num.patients)
+
+for(i in 1:num.patients){
+  if (V.aml[i] > V.all[i]){predicted.leuk.type[i] = "aml"}
+  if (V.aml[i] < V.all[i]){predicted.leuk.type[i] = "all"}
+  if (V.aml[i] == V.all[i]){predicted.leuk.type[i] = "tie"}
+}
+
+predicted.leuk.type
+
+#a) Briefly describe how the \texttt{for()} loop to create \texttt{V.aml} and \texttt{V.all} works.
+print("the for loop iterates over each patient where deviation values will be extracted for genes with vote ==0 (aml-like expression) or vote == 1 (all-like expression), and further being summed respectively.")
+  
+#b) Briefly describe how the \texttt{for()} loop and \texttt{if} statements to create \texttt{predicted.leuk.type} work.
+print("loop iterates over patients, and if check the condition for predicting leukemia type. For aml[i]> all[i], patient type will be categorized as aml. For aml[i]< all[i], fewer deviation in aml expression type, but higher in all type will be categorized accordingly; equal changes is undetermined type and categoried to tie.")
+
+  
+#c) What are the predicted leukemia types for the 10 patients in \texttt{golub.test}?
+```
+
+
+```{r, eval = FALSE}
+##13. Assess the prediction accuracy, comparing the prediction to the actual leukemia status of each patient in \texttt{golub.test}. How well do the predictions match patient leukemia status?
+#compare predictions to actual leukemia type
+#option 1: visual comparison
+golub.test$cancer
+predicted.leuk.type
+
+
+#option 2: use logical variables
+actual.leuk.type.ind = (golub.test$cancer == "aml")
+predicted.leuk.type.ind = (predicted.leuk.type == "aml")
+
+comparison.results = (actual.leuk.type.ind == predicted.leuk.type.ind)
+table(comparison.results)
+
+print("all matched")
+```
+```{r}
+### Exploring the data
+
+##### The first part of this lab focuses on using numerical and graphical methods to explore the overall picture of how expression levels differ by population (TBG and KA) and vernalization conditions (V and NV). For simplicity, we will work with a sample from the complete dataset.
+##1. Take a sample of 100 genes (without replacement) from the 1,088 genes in the dataset, using '5011' in the \texttt{set.seed()} command. Name the sample \texttt{arenosa.sample}.
+data(arenosa)
+set.seed(5011) 
+sampled <- sample(1:nrow(arenosa), size=100, replace = FALSE)
+arenosa.sample <- arenosa[sampled, ]
+arenosa.sample
+# View the first five rows and first seven columns of the sample
+##2. Print out the first five rows and first seven columns of \texttt{arenosa.sample}; briefly describe the data matrix shown. Does expression of these genes seem higher in vernalized or non-vernalized plants?
+arenosa.sample[1:5, 1:7]
+print("the ka.v seems to be higher than that of nv")
+
+```
+
+
+```{r}
+##3. The three measured individuals in a particular group represent biological replicates: individuals of the same type grown under identical conditions. Collecting data from multiple replicates captures the inherent biological variability between organisms. Thus, averaging expression levels across replicates provides an estimate of the typical expression level in the larger population. 
+#Using the \texttt{apply()} function as shown in the template, calculate mean expression level across the three replicates for each type of sample: non-vernalized KA, vernalized KA, non-vernalized TBG, and vernalized TBG.\footnote{Recall that the \texttt{apply()} function was introduced in Lab 3 of this chapter; refer to the Lab Notes for an explanation of the function syntax.}
+kanv_mean = apply(arenosa.sample[2:4], 1, mean)
+kav_mean = apply(arenosa.sample[5:7], 1, mean)
+tbgnv_mean = apply(arenosa.sample[8:10], 1, mean)
+tbgvmean = apply(arenosa.sample[11:13], 1, mean)
+```
+
+
+```{r}
+##4. Using graphical methods, compare expression levels of cold-responsive genes between non-vernalized and vernalized KA, and between non-vernalized and vernalized TBG. How does gene expression differ between non-vernalized and vernalized plants?
+boxplot(kanv_mean, kav_mean,
+        names = c("KA Non-Vernalized", "KA Vernalized"),
+        main = "Comparison of KA Gene Expression",
+        ylab = "Mean Expression Level")
+
+boxplot(tbgnv_mean, tbgvmean,
+        names = c("TBG Non-Vernalized", "TBG Vernalized"),
+        main = "Comparison of TBG Gene Expression",
+        ylab = "Mean Expression Level")
+print("the expression levels of vernalized KA and TBG are noticeably higher.")
+```
+
+
+```{r}
+##5. Using graphical and numerical methods, compare expression levels of cold-responsive genes between non-vernalized KA and non-vernalized TBG, and between vernalized KA and vernalized TBG. How does gene expression differ between non-vernalized KA and TBG plants? How does gene expression differ between vernalized KA and TBG plants?
+boxplot(kanv_mean, tbgnv_mean,
+        names = c("KA Non-Vernalized", "TBG Non-Vernalized"),
+        main = "Comparison of Non-Vernalized Gene Expression",
+        ylab = "Mean Expression Level")
+
+boxplot(kav_mean, tbgvmean,
+        names = c("KA Vernalized", "TBG Vernalized"),
+        main = "Comparison of Vernalized Gene Expression",
+        ylab = "Mean Expression Level")
+print("For NON-veralized group, TBG shown higher expression levels in general, whereas for vernalized group, ka shown higher expression levels in general ")
+```
+
+
+```{r}
+##6. Based on the observations made in Questions 4 and 5, does vernalization appear to trigger a stronger change in gene expression in KA plants or TBG plants?
+difference_ka <- kav_mean - kanv_mean
+difference_tbg <- tbgvmean - tbgnv_mean
+
+boxplot(difference_ka, difference_tbg,
+        names = c("KA Difference (V - NV)", "TBG Difference (V - NV)"),
+        main = "Differences in Gene Expression Due to Vernalization",
+        ylab = "Difference in Mean Expression Level")
+
+print("yes, vernalization induced different levelhigher expression variation in KA than that of TBG, but both shown noticeable difference dur to vernalization.")
+```
+
+
+```{r}
+### Identifying outliers for responsiveness
+##7. A more quantitative way to explore the data is to use a gene-level approach. Let the ratio of expression under vernalized conditions to expression under non-vernalized conditions represent the 'responsiveness' of a gene to vernalization. 
+#Using the expression means defined in Question 3, calculate the responsiveness of the genes in \texttt{arenosa.sample} for TBG and for KA. Examine the responsiveness for the first three genes in the sample. Interpret the meaning of responsiveness values of 1, less than 1, and greater than 1. 
+# Calculate responsiveness for KA
+resp_ka <- kav_mean / kanv_mean
+
+# Calculate responsiveness for TBG
+resp_tbg <- tbgvmean / tbgnv_mean
+
+# Display the responsiveness values for the first three genes
+print("Responsiveness for the first three genes in KA:")
+resp_ka[1:3]
+
+print("Responsiveness for the first three genes in TBG:")
+resp_tbg[1:3]
+
+```
+
+
+```{r}
+##8. Create a plot to compare the responsiveness of genes in KA versus TBG for the genes in \texttt{arenosa.sample}; a transformation may be helpful. Describe what you see.
+# Log-transform the responsiveness to better visualize differences
+log_resp_ka <- log(resp_ka)
+log_resp_tbg <- log(resp_tbg)
+
+# Plot the log-transformed responsiveness values
+plot(log_resp_ka, log_resp_tbg,
+     xlab = "Log Responsiveness (KA)",
+     ylab = "Log Responsiveness (TBG)",
+     main = "Comparison of Gene Responsiveness to Vernalization in KA vs. TBG",
+     pch = 19, col = "blue")
+
+# Add a reference line for equal responsiveness
+abline(a = 0, b = 1, col = "red", lty = 2)
+print(" there seems to have higher levels of responsiveness in KA  than that of in TBG. There are genes that shared similar levels of upregulation, and overall patterns indicate gene expression upregulation in response to vernalization.")
+```
+
+
+```{r}
+##9. Among the 1,088 genes in the complete dataset, which seem to have unusually high or low response to cold treatment; in other words, which genes have a response that is an outlier? Conduct separate analyses for TBG and KA plants, on log-transformed responsiveness.
+#a) Report the genes that are high outliers for both KA and TBG, and the genes that are low outliers for both KA and TBG. 
+log_resp_ka <- log(resp_ka)
+log_resp_tbg <- log(resp_tbg)
+# Calculate the IQR for KA and TBG
+iqr_ka <- IQR(log_resp_ka, na.rm = TRUE)
+iqr_tbg <- IQR(log_resp_tbg, na.rm = TRUE)
+
+# Calculate the upper and lower bounds for outliers
+upbound_ka <- quantile(log_resp_ka, 0.75, na.rm = TRUE) + 1.5 * iqr_ka
+lobound_ka <- quantile(log_resp_ka, 0.25, na.rm = TRUE) - 1.5 * iqr_ka
+
+upbound_tbg <- quantile(log_resp_tbg, 0.75, na.rm = TRUE) + 1.5 * iqr_tbg
+lobound_tbg <- quantile(log_resp_tbg, 0.25, na.rm = TRUE) - 1.5 * iqr_tbg
+
+# Identify high and low outliers for KA
+high_out_ka <- which(log_resp_ka > upbound_ka)
+low_out_ka <- which(log_resp_ka < lobound_ka)
+
+# Identify high and low outliers for TBG
+high_out_tbg <- which(log_resp_tbg > upbound_tbg)
+low_out_tbg <- which(log_resp_tbg < lobound_tbg)
+
+# Find common high and low outliers for both KA and TBG
+high_out_both <- intersect(high_out_ka, high_out_tbg)
+low_out_both <- intersect(low_out_ka, low_out_tbg)
+
+gene_names <- arenosa.sample$gene.name
+high_outliers_both_genes <- gene_names[high_out_both]
+low_outliers_both_genes <- gene_names[low_out_both]
+# Report the high and low outliers common to both
+print("High outliers for both KA and TBG:")
+high_outliers_both_genes
+
+print("Low outliers for both KA and TBG:")
+low_outliers_both_genes
+
+  
+#b) Why might it be interesting to further investigate cold-responsive genes that are either high outliers or low outliers for both KA and TBG?
+print("High Outliers are Genes that are highly responsive in both KA and TBG may play a critical role in cold adaptation and could represent targets for further research in understanding plant cold tolerance mechanisms. Low Outliers are Genes that are consistently unresponsive to vernalization in both populations could indicate a lack of involvement in cold response pathways, suggesting they may not be relevant to cold adaptation or could even be genes with regulatory mechanisms that suppress their activity under cold conditions.")
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
